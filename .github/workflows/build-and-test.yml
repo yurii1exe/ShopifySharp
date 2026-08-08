@@ -75,14 +75,6 @@ jobs:
     permissions:
       contents: read
 
-    env:
-      SHOPIFYSHARP_ACCESS_TOKEN: "${{ secrets.SHOPIFYSHARP_ACCESS_TOKEN }}"
-      SHOPIFYSHARP_API_KEY: "${{ secrets.SHOPIFYSHARP_API_KEY }}"
-      SHOPIFYSHARP_SECRET_KEY: "${{ secrets.SHOPIFYSHARP_SECRET_KEY }}"
-      SHOPIFYSHARP_MY_SHOPIFY_URL: "${{ secrets.SHOPIFYSHARP_MY_SHOPIFY_URL }}"
-      SHOPIFYSHARP_ORG_ID: "${{ secrets.SHOPIFYSHARP_ORG_ID }}"
-      SHOPIFYSHARP_ORG_TOKEN: "${{ secrets.SHOPIFYSHARP_ORG_TOKEN }}"
-
     steps:
     - name: Setup justfile
       uses: taiki-e/install-action@f176c07a0a40cbfdd08ee9aa8bf1655701d11e69 # v2.67.25
@@ -95,7 +87,9 @@ jobs:
         persist-credentials: false
 
     - name: Execute .NET Framework unit tests
-      run: just verbosity=quiet test-dnf
+      env:
+        SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
+      run: just verbosity=quiet test-dnf --use-sops-env-file
 
     - name: Upload test results
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -112,14 +106,6 @@ jobs:
     environment: "Unit test environment"
     permissions:
       contents: read
-
-    env:
-      SHOPIFYSHARP_ACCESS_TOKEN: "${{ secrets.SHOPIFYSHARP_ACCESS_TOKEN }}"
-      SHOPIFYSHARP_API_KEY: "${{ secrets.SHOPIFYSHARP_API_KEY }}"
-      SHOPIFYSHARP_SECRET_KEY: "${{ secrets.SHOPIFYSHARP_SECRET_KEY }}"
-      SHOPIFYSHARP_MY_SHOPIFY_URL: "${{ secrets.SHOPIFYSHARP_MY_SHOPIFY_URL }}"
-      SHOPIFYSHARP_ORG_ID: "${{ secrets.SHOPIFYSHARP_ORG_ID }}"
-      SHOPIFYSHARP_ORG_TOKEN: "${{ secrets.SHOPIFYSHARP_ORG_TOKEN }}"
 
     steps:
     - name: Setup justfile
@@ -138,22 +124,10 @@ jobs:
       with:
         persist-credentials: false
 
-    - name: Create ShopifySharp.Tests.Integration/appsettings.local.json
-      run: |
-        cat <<EOF > ShopifySharp.Tests.Integration/appsettings.local.json
-        {
-          "ShopifySharp": {
-            "Credentials": {
-              "ShopDomain": "${{ secrets.SHOPIFYSHARP_MY_SHOPIFY_URL }}",
-              "AccessToken": "${{ secrets.SHOPIFYSHARP_ACCESS_TOKEN }}",
-              "ApiKey": "${{ secrets.SHOPIFYSHARP_API_KEY }}"
-            }
-          }
-        }
-        EOF
-
     - name: Execute unit test script
-      run: just verbosity=quiet test-everything
+      env:
+        SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
+      run: just verbosity=quiet test-everything --use-sops-env-file
 
     - name: Upload test results
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

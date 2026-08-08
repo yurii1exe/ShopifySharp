@@ -161,14 +161,16 @@ create-graphql-pr graphqlSchemaFile jsonSchemaFile token="":
 
 # Run .NET Framework unit tests
 [group("test")]
-test-dnf:
+[arg("useSopsEnvFile", long="use-sops-env-file", value="true")]
+test-dnf useSopsEnvFile="false":
     @echo "Testing .NET Framework tests..."
     dotnet test \
         -c "{{config}}" \
         -f "{{netFramework}}" \
         --verbosity "{{verbosity}}" \
         --logger "trx;LogFileName=DotNetFramework.trx" \
-        --results-directory "TestResults" \
+        --results-directory "TestResults"
+        {{ if useSopsEnvFile == "true" { "--environment SOPS_ENV_FILE=" + sops_env_file } else { "" } }}
         --filter "Category=DotNetFramework"
     @echo ""
     @echo ".NET Framework tests passed."
@@ -198,15 +200,12 @@ test-integration useSopsEnvFile="false" testFilter="":
         -f "{{netCoreApp}}" \
         --verbosity "{{verbosity}}" \
         --logger "trx;LogFileName=ShopifySharp.Integration.Tests.trx" \
-        --results-directory "TestResults" \
-        {{ if useSopsEnvFile == "true" { "--environment SOPS_ENV_FILE=" + sops_env_file } else { "" } }} \
-        {{ if testFilter != "" { "--filter '" + testFilter + "'" } else { "" } }} \
+        --results-directory "TestResults"
+        {{ if useSopsEnvFile == "true" { "--environment SOPS_ENV_FILE=" + sops_env_file } else { "" } }}
+        {{ if testFilter != "" { "--filter '" + testFilter + "'" } else { "" } }}
         "ShopifySharp.Tests.Integration/ShopifySharp.Tests.Integration.csproj"
     @echo ""
     @echo "Integration tests passed."
-
-[private]
-_test-query-builder-integrations:
 
 # Run integration tests on the GraphQL query builders.
 [arg("useSopsEnvFile", long="use-sops-env-file", value="true")]
@@ -217,9 +216,9 @@ test-query-builder-integration useSopsEnvFile="false":
         -f "{{netCoreApp}}" \
         --verbosity "{{verbosity}}" \
         --logger "trx;LogFileName=ShopifySharp.GraphQL.QueryBuilders.Integrations.Tests.trx" \
-        --results-directory "TestResults" \
-        {{ if useSopsEnvFile == "true" { "--environment SOPS_ENV_FILE=" + sops_env_file } else { "" } }} \
-        --filter "FullyQualifiedName~{{ replace(query_builder_tests, " ", "|") }}" \
+        --results-directory "TestResults"
+        {{ if useSopsEnvFile == "true" { "--environment SOPS_ENV_FILE=" + sops_env_file } else { "" } }}
+        --filter "FullyQualifiedName~{{ replace(query_builder_tests, " ", "|") }}"
         "ShopifySharp.Tests.Integration/ShopifySharp.Tests.Integration.csproj"
 
 # Run tests on the GraphQL query builders.
@@ -269,9 +268,10 @@ test-main-project:
     @echo ""
     @echo "Main project tests passed."
 
-# Run all tests (DI, integration, and unit tests)
+# Run all tests (DI, GraphQL Parser, Integration, and Unit Tests)
 [group("test")]
-test-everything: test-di test-graphql-parser (test-integration "true") test-main-project
+[arg("useSopsEnvFile", long="use-sops-env-file", value="true")]
+test-everything useSopsEnvFile="false": test-di test-graphql-parser (test-integration useSopsEnvFile) test-main-project
     @echo "All tests passed."
 
 # Set package version for a project (used in release workflow)
