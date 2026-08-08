@@ -169,8 +169,8 @@ test-dnf useSopsEnvFile="false":
         -f "{{netFramework}}" \
         --verbosity "{{verbosity}}" \
         --logger "trx;LogFileName=DotNetFramework.trx" \
-        --results-directory "TestResults"
-        {{ if useSopsEnvFile == "true" { "--environment SOPS_ENV_FILE=" + sops_env_file } else { "" } }}
+        --results-directory "TestResults" \
+        {{ if useSopsEnvFile == "true" { "--environment SOPS_ENV_FILE=" + sops_env_file } else { "" } }} \
         --filter "Category=DotNetFramework"
     @echo ""
     @echo ".NET Framework tests passed."
@@ -200,9 +200,9 @@ test-integration useSopsEnvFile="false" testFilter="":
         -f "{{netCoreApp}}" \
         --verbosity "{{verbosity}}" \
         --logger "trx;LogFileName=ShopifySharp.Integration.Tests.trx" \
-        --results-directory "TestResults"
-        {{ if useSopsEnvFile == "true" { "--environment SOPS_ENV_FILE=" + sops_env_file } else { "" } }}
-        {{ if testFilter != "" { "--filter '" + testFilter + "'" } else { "" } }}
+        --results-directory "TestResults" \
+        {{ if useSopsEnvFile == "true" { "--environment SOPS_ENV_FILE=" + sops_env_file } else { "" } }} \
+        {{ if testFilter != "" { "--filter '" + testFilter + "'" } else { "" } }} \
         "ShopifySharp.Tests.Integration/ShopifySharp.Tests.Integration.csproj"
     @echo ""
     @echo "Integration tests passed."
@@ -216,9 +216,9 @@ test-query-builder-integration useSopsEnvFile="false":
         -f "{{netCoreApp}}" \
         --verbosity "{{verbosity}}" \
         --logger "trx;LogFileName=ShopifySharp.GraphQL.QueryBuilders.Integrations.Tests.trx" \
-        --results-directory "TestResults"
-        {{ if useSopsEnvFile == "true" { "--environment SOPS_ENV_FILE=" + sops_env_file } else { "" } }}
-        --filter "FullyQualifiedName~{{ replace(query_builder_tests, " ", "|") }}"
+        --results-directory "TestResults" \
+        {{ if useSopsEnvFile == "true" { "--environment SOPS_ENV_FILE=" + sops_env_file } else { "" } }} \
+        --filter "FullyQualifiedName~{{ replace(query_builder_tests, " ", "|") }}" \
         "ShopifySharp.Tests.Integration/ShopifySharp.Tests.Integration.csproj"
 
 # Run tests on the GraphQL query builders.
