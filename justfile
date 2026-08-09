@@ -79,19 +79,27 @@ regenerate-and-build schemaFile="graphql.schema.graphql" noBuild="false": clean 
 [arg("domain", long)]
 [arg("token", long)]
 [arg("output", long)]
-download-graphql-schema version domain token output="": _buildCliProject
+[arg("useSopsEnvFile", long="use-sops-env-file", value="true")]
+download-graphql-schema version domain="" token="" output="" useSopsEnvFile="false": _buildCliProject
     #!/usr/bin/env bash
     set -euo pipefail
+
+    if [ "{{useSopsEnvFile}}" != "true" ] && { [ -z "{{domain}}" ] || [ -z "{{token}}" ]; }; then
+        echo "Error: Either use --use-sops-env-file or provide both --domain and --token."
+        exit 1
+    fi
+
     output_file="{{ if output == "" { version + ".schema.json" } else { output } }}"
     dotnet run --no-build \
         --configuration Release \
         --project "{{cli_project}}" \
+        {{ if useSopsEnvFile == "true" { "--environment SOPS_ENV_FILE=" + sops_env_file } else { "" } }} \
         -- \
         download \
         -o "$output_file" \
         --api-version "{{version}}" \
-        --domain "{{domain}}" \
-        --token "{{token}}"
+        {{ if domain != "" { "--domain \"" + domain + "\"" } else { "" } }} \
+        {{ if token != "" { "--token \"" + token + "\"" } else { "" } }}
 
 # Converts a .json GraphQL schema to .graphql
 [group("graphql")]

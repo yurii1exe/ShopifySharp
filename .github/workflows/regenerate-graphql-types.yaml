@@ -63,7 +63,9 @@ jobs:
       run: dotnet restore
 
     - name: Download GraphQL schema
-      run: just download-graphql-schema --api-version "$SCHEMA_VERSION" --domain "${{ secrets.SHOPIFYSHARP_MY_SHOPIFY_URL }}" --token "${{ secrets.SHOPIFYSHARP_ACCESS_TOKEN }}" --output "$SCHEMA_JSON_FILE"
+      env:
+        SOPS_AGE_KEY: "${{ secrets.SOPS_AGE_KEY }}"
+      run: just download-graphql-schema --api-version "$SCHEMA_VERSION" --output "$SCHEMA_JSON_FILE" --use-sops-env-file
 
     - name: Convert JSON schema to GraphQL
       run: just convert-graphql-schema --input "$SCHEMA_JSON_FILE" --output "$SCHEMA_GRAPHQL_FILE"
